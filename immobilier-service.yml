@@ -1,0 +1,59 @@
+server:
+  port: 8082
+spring:
+  profiles:
+    active: dev
+  application:
+    name: immobilier-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/auth/realms/norsys
+  datasource:
+    url: jdbc:postgresql://localhost:5432/candidature-service
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: update
+  #    properties:
+  #      javax:
+  #        persistence:
+  #          schema-generation:
+  #            create-source: metadata
+  #            scripts:
+  #              action: create
+  #              create-target: candidature-service.sql
+  sleuth:
+    sampler:
+      probability: 1.0
+  zipkin:
+    baseUrl: http://localhost:9411/
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+  root: DEBUG
+
+queue:
+  name: messagequeue
+fanout:
+  exchange: messagequeue-exchange
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+keycloak:
+  client-id: "immobilier"
+

@@ -1,0 +1,73 @@
+server:
+  port: 8765
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: gateway-server
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8180/auth/realms/RealmImmobilier
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: ClientConfidentialImmobilier
+            client-secret: 5fe72c6f-4add-4bfb-bef3-00ec02bb5936
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+        - TokenRelay
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowCredentials: true
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - OPTIONS
+      routes:
+        - id: evenement-service
+          uri: lb://evenement-service
+          predicates:
+            - Path=/events/**
+        - id: notification-service-socket
+          uri: lb:ws://notification-service
+          predicates:
+            - Path=/socket/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/communication/**
+  sleuth:
+    sampler:
+      probability: 1.0
+    zipkin:
+      baseUrl: http://localhost:9411/
+
+realm-admin:
+  server-url: http://localhost:8180/auth
+  realm: norsys
+  username: ibdaa-admin
+  password: mysecretpassword
+
+logging:
+  level:
+    org.keycloak: TRACE
+    root: DEBUG
+
+
